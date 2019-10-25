@@ -1,0 +1,269 @@
+#include <Servo.h>
+#include <Keypad.h>
+
+
+const byte ROWS = 4; //four rows
+const byte COLS = 3; //three columns
+char keys[ROWS][COLS] = {
+  {'1','2','3'},
+  {'4','5','6'},
+  {'*','0','#'}
+};
+
+/*you need to enter in below arrays the corresponding Arduino pin #'s and you need to fill them according to below sequence, i.e; col3, col2, col1 and row1, row2, row3, row4*/
+    /*keypad row pins:2  7  6  4*/
+                 /*row1 row2 row3 row4*/
+byte rowPins[ROWS] = {10, A1, A0}; //Arduino Pins
+ /*keypad column pins:3  1  5*/
+                 /*col1 col2 col3*/
+byte colPins[COLS] = {A2, 9, 12}; //Arduino Pins
+
+Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, ROWS, COLS);
+
+unsigned long start1, start2, start3, start4, start5, finished1, finished2, finished3, finished4,  finished5, elapsed;
+
+// variables
+char inputString[4];  // holds the user input
+int curpos = 0; // cursor position
+float fee;
+
+// make an array to save Sev Seg pin configuration of numbers
+
+int num_array[10][7] = {  { 1,1,1,1,1,1,0 },    // 0
+                          { 0,1,1,0,0,0,0 },    // 1
+                          { 1,1,0,1,1,0,1 },    // 2
+                          { 1,1,1,1,0,0,1 },    // 3
+                          { 0,1,1,0,0,1,1 },    // 4
+                          { 1,0,1,1,0,1,1 },    // 5
+                          { 1,0,1,1,1,1,1 },    // 6
+                          { 1,1,1,0,0,0,0 },    // 7
+                          { 1,1,1,1,1,1,1 },    // 8
+                          { 1,1,1,0,0,1,1 }};   // 9
+                                       
+//function header
+void Num_Write(int);
+int n = 5;
+int m = 0;
+String p;
+ 
+Servo myservo;  // create servo object to control a servo 
+int SensorPin=A3; 
+int Value;
+int delayTime=3000;
+int Capacity=5; 
+int LEDpin=13; 
+void setup()
+{
+  // set pin modes
+  pinMode(2, OUTPUT);   
+  pinMode(3, OUTPUT);
+  pinMode(4, OUTPUT);
+  pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
+  pinMode(8, OUTPUT);
+  
+myservo.attach(11);  // attaches the servo on pin 9 to the servo object
+pinMode(LEDpin, OUTPUT); 
+pinMode(SensorPin, INPUT); 
+Serial.begin(9600);
+}
+
+void loop()
+{ 
+int LDRStatus = analogRead(SensorPin); // C1 1
+int LDR = analogRead(SensorPin); // C2 1
+if (LDRStatus <=300 && m<5) // C3 1
+{
+digitalWrite(LEDpin, HIGH); // C4 1
+   n=n-1; // C5 1
+   m=m+1; // C6 1
+   Num_Write(n); // C7 n+1
+
+   myservo.write(0); // C8 1
+   delay(3000); // C9 1
+   Num_Write(m); // C10 n+1
+   LDR = analogRead(SensorPin); // C11 1
+   while (LDR <= 300) // C12 n+1
+    {
+      myservo.write(0); // C13 n
+      delay(2000); // C14 n
+      LDR = analogRead(SensorPin); // C15 n
+    }
+   digitalWrite(LEDpin, LOW); // C16 1
+   myservo.write(90); // C17 1
+}
+if (Serial.available()) // C18 1
+{
+  p = Serial.readString(); // C19 1
+  Serial.println(); // C20 1
+  Serial.println(p); // C21 1
+  if (p=="paid" && n<5) // C22 1
+  {
+    digitalWrite(LEDpin, HIGH); // C23 1
+    n=n+1; // C24 1
+    m=m-1; // C25 1
+    Serial.print("thank you"); // C26 1
+    Serial.println(); // C27 1
+    Num_Write(n); // C28 n+1
+    myservo.write(0); // C29 1
+    delay(3000); // C30 1
+    Num_Write(m); // C31 n+1
+    digitalWrite(LEDpin, LOW); // C32 1
+    myservo.write(90); // C33 1
+  }
+}
+
+
+  char key = keypad.getKey(); // C34 1
+  if (key != NO_KEY){   // only be bothered to do something if a key was pressed // C35 1
+    inputString[curpos] = key; // if the key was none of the above three special ones, add the digit to the password string // C36 1
+    curpos = curpos + 1; // move cursor to next position // C37 1
+
+    if ((inputString[0]== '*') && (inputString[2]== '#')){       // C38 1
+    switch(inputString[1]) // look for the special keys to initiate an event // C39 1
+    {
+      case '1':
+      Serial.println(); // C40 1
+      Serial.println("Car (1) In"); // C41 1
+      start1 = millis(); // C42 1
+      delay(200); // for debounce // C43 1  
+      break; // C44 1
+      
+      case '2':
+      Serial.println(); // C45 1
+      Serial.println("Car (2) In"); // C46 1
+      start2 = millis(); // C47 1
+      delay(200); // for debounce // C48 1
+      break; // C49 1
+      
+      case '3':
+      Serial.println(); // C50 1
+      Serial.println("Car (3) In"); // C51 1
+      start3 = millis(); // C52 1
+      delay(200); // for debounce // C53 1
+      break; // C56 1
+
+      case '4':
+      Serial.println(); // C57 1
+      Serial.println("Car (4) In"); // C58 1
+      start4 = millis(); // C59 1
+      delay(200); // for debounce // C60 1
+      break; // C61 1
+
+      case '5':
+      Serial.println(); // C62 1
+      Serial.println("Car (5) In"); // C63 1
+      start5 = millis(); // C64 1
+      delay(200); // for debounce // C65 1
+      break; // C66 1
+    }    
+    }
+    
+    if ((inputString[0]== '#') && (inputString[2]== '*')){ // C67 1
+    switch(inputString[1]) // look for the special keys to initiate an event // C68 1
+    {
+      case '1':
+      Serial.println(); // C69 1
+      Serial.println("Car (1) Out"); // C70 1
+      finished1 = millis(); // C71 1
+      delay(200); // for debounce // C72 1
+      displayResult(start1, finished1); // C73 1
+      break; // C74 1
+      
+      case '2': 
+      Serial.println(); // C75 1
+      Serial.println("Car (2) Out"); // C76 1
+      finished2 = millis(); // C77 1
+      delay(200); // for debounce // C78 1
+      displayResult(start2, finished2); // C79 1
+      break; // C80 1
+      
+      case '3':
+      Serial.println(); // C81 1
+      Serial.println("Car (3) Out"); // C82 1
+      finished3 = millis(); // C83 1
+      delay(200); // for debounce // C84 1
+      displayResult(start3, finished3); // C85 1
+      break; // C86 1
+      
+      case '4':
+      Serial.println(); // C87 1
+      Serial.println("Car (4) Out"); // C88 1
+      finished4 = millis(); // C89 1
+      delay(200); // for debounce // C90 1
+      displayResult(start4, finished4); // C91 1
+      break; // C92 1
+
+      case '5':
+      Serial.println(); // C93 1
+      Serial.println("Car (5) Out"); // C94 1
+      finished5 = millis(); // C95 1
+      delay(200); // for debounce // C96 1
+      displayResult(start5, finished5); // C97 1
+      break; // C98 1
+    }    
+    }
+
+   if(curpos > 2) // if the cursor has reached the end of 4 digits, return it to the start  // C99 1
+     {
+     Serial.println();  // C100 1
+     Serial.println(inputString); // C101 1
+     Serial.println(); // C102 1
+     curpos = 0; // C103 1
+     clearPassword(); // C104 n+1
+     }
+ }
+
+}
+
+// this functions writes values to the sev seg pins  
+void Num_Write(int number) 
+{
+  int pin= 2;
+  for (int j=0; j < 7; j++) {
+   digitalWrite(pin, num_array[number][j]);
+   pin++;
+  }
+}
+
+
+// this function displays the time
+void displayResult(unsigned long start, unsigned long finished)
+{
+ float h, m, s, ms;
+ unsigned long over;
+ elapsed = finished - start;
+ h = int(elapsed / 3600000);
+ over = elapsed % 3600000;
+ m = int(over / 60000);
+ over = over % 60000;
+ s = int(over / 1000);
+ ms = over % 1000;
+
+ fee = (elapsed/1000.0)*0.28;
+ 
+ Serial.print("Elapsed time: ");
+ Serial.print(h, 0);
+ Serial.print("h ");
+ Serial.print(m, 0);
+ Serial.print("m ");
+ Serial.print(s, 0);
+ Serial.print("s ");
+ Serial.print(ms, 0);
+ Serial.println("ms");
+
+ Serial.print("Your total payment is ");
+ Serial.print(fee);
+ Serial.print(" fils.");
+}
+
+
+// clears the entered password after system is locked (so person can't just press # to unlock, needs to enter 4 digit code again!)
+void clearPassword()
+{
+  for(int a=0; a < 3; a++)
+  {
+    inputString[a] = '0';
+  }
+}
